@@ -1,0 +1,1 @@
+from . import lexicon_ru as lexicon_ru
