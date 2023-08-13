@@ -1,10 +1,9 @@
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Command, Text
 from aiogram.fsm.context import FSMContext
 import asyncio
 
-from aiogram import Router
-from aiogram.filters import Command, CommandStart, StateFilter, Text
+from aiogram import Router, F
+from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove

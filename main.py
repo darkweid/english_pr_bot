@@ -2,7 +2,7 @@ import csv, time, asyncio, logging
 # from background import keep_alive
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command, Text
+from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery, BotCommand, URLInputFile
 from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove, ContentType
 from aiogram.fsm.storage.redis import RedisStorage, Redis
@@ -49,7 +49,14 @@ async def main():  # Запускаем бота и пропускаем все 
     await dp.start_polling(bot)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+#if __name__ == "__main__":
+#    asyncio.run(main())
     #    keep_alive()
-    dp.startup.register(set_main_menu)
+#    dp.startup.register(set_main_menu)
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+        #    keep_alive()
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Bot stopped!")

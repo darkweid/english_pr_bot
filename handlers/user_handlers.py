@@ -2,7 +2,7 @@ from aiogram.fsm.context import FSMContext
 import asyncio, random, json
 
 from aiogram import Router, F
-from aiogram.filters import Command, CommandStart, StateFilter, Text
+from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
@@ -19,7 +19,7 @@ main_dict = {}
 done_lst = []
 
 
-@user_router.message(Text(text='[Сбросить машину состояний]'))
+@user_router.message(F.text == '[Сбросить машину состояний]')
 async def training_new(message: Message, state: FSMContext):
     await message.answer('Сброшено!')
     await state.clear()
@@ -39,12 +39,12 @@ async def process_start_command(message: Message, state: FSMContext):
 
 # Этот хэндлер будет срабатывать на команду "/start" -
 @user_router.message(Command(commands=['start']), ~StateFilter(default_state))
-@user_router.message(Text(text='Выход'), ~StateFilter(default_state))
+@user_router.message(F.text == 'Выход', ~StateFilter(default_state))
 async def process_start_command_patron(message: Message, state: FSMContext):
     await message.answer(f"""⬇️ Чем займёмся сегодня? ⬇️""", reply_markup=kb_training_or_new_words)
 
 
-@user_router.message(Text(text='Тренажер по грамматике'),
+@user_router.message((F.text == 'Тренажер по грамматике'),
                      StateFilter(default_state))  # Показываем правила новому пользователю
 async def training_new(message: Message, state: FSMContext):
     await message.answer(f"""Окей, правила простые: я пишу на русском, ты переводишь на английский.
@@ -52,8 +52,11 @@ async def training_new(message: Message, state: FSMContext):
     await state.set_state(FSMtraining.in_process)
 
 
-@user_router.message(Text(text=['Тренажер по грамматике', 'Ок, начинаем']),
-                     ~StateFilter(default_state))  # Кнопку нажал пользователь, знающий правила
+# Кнопку нажал пользователь, знающий правила
+@user_router.message(F.text == ('Тренажер по грамматике'),
+                     ~StateFilter(default_state))
+@user_router.message(F.text == ('Ок, начинаем'),
+                     ~StateFilter(default_state))
 async def training_old(message: Message, state: FSMContext):
     global main_dict, level, word, done_lst
     print(done_lst)
