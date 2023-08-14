@@ -68,10 +68,15 @@ async def check_hw(user_id):
     else:
         return None
 
-async def get_users_list():
+async def get_users_dict():
+    dict = {}
     cursor.execute("SELECT user_id, username, name FROM users")
-    row = cursor.fetchone()
+    row = cursor.fetchall()
     print(row)
+    for elem in row:
+        dict[elem[0]] = f'{elem[0]}: {elem[1]} {elem[2]}'
+    print (dict)
+    return dict
 
 
 dict_hw = {

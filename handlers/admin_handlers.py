@@ -15,27 +15,21 @@ from keyboards.keyboards import (kb_training_or_new_words, kb_training_go,
                                  kb_training_choise_lvl, kb_training_in_game)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
-from sqlite_db import (create_profile, edit_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress, get_users_list)
-
+from sqlite_db import (create_profile, edit_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress,
+                       get_users_dict)
 
 
 # Функция для формирования инлайн-клавиатуры на лету
 # Функция для генерации инлайн-клавиатур "на лету"
 def create_inline_kb(width: int,
-                     *args: str,
                      last_btn: str | None = None,
-                     **kwargs: str) -> InlineKeyboardMarkup:
+                     **kwargs: dict) -> InlineKeyboardMarkup:
     # Инициализируем билдер
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
     # Инициализируем список для кнопок
     buttons: list[InlineKeyboardButton] = []
 
     # Заполняем список кнопками из аргументов args и kwargs
-    if args:
-        for button in args:
-            buttons.append(InlineKeyboardButton(
-                text=LEXICON[button] if button in LEXICON else button,
-                callback_data=button))
     if kwargs:
         for button, text in kwargs.items():
             buttons.append(InlineKeyboardButton(
@@ -47,8 +41,8 @@ def create_inline_kb(width: int,
     # Добавляем в билдер последнюю кнопку, если она передана в функцию
     if last_btn:
         kb_builder.row(InlineKeyboardButton(
-                            text=last_btn,
-                            callback_data='last_btn'))
+            text=last_btn,
+            callback_data='last_btn'))
 
     # Возвращаем объект инлайн-клавиатуры
     return kb_builder.as_markup()
@@ -58,6 +52,8 @@ def create_inline_kb(width: int,
 
     # Возвращаем объект инлайн-клавиатуры
     return kb_builder.as_markup()
+
+
 admin_router: Router = Router()
 config: Config = load_config()
 ADMINS: list = config.tg_bot.admin_ids
@@ -76,32 +72,35 @@ big_button_1: InlineKeyboardButton = InlineKeyboardButton(
     callback_data='big_button_1_pressed')
 
 keyboard_adm: InlineKeyboardMarkup = InlineKeyboardMarkup(
-    inline_keyboard=[[button_see_progress],[ button_edit_hw], [button_see_done_words]])
+    inline_keyboard=[[button_see_progress], [button_edit_hw], [button_see_done_words]])
+
 
 # admin_handlers
-@admin_router.message(Command(commands=["admin"]),F.from_user.id == superadmin)
+@admin_router.message(Command(commands=["admin"]), F.from_user.id == superadmin)
 async def process_admin_command(message: Message, state: FSMContext):
-    await message.answer('Что будем делать, хозяин?', reply_markup= keyboard_adm)
+    await message.answer('Что будем делать, хозяин?', reply_markup=keyboard_adm)
     print(superadmin)
     await state.set_state(FSMtraining.admin)
 
 
-#@admin_router.callback_query(Text(text=['progress']))
-#async def see_progress(callback: CallbackQuery):
+# @admin_router.callback_query(Text(text=['progress']))
+# async def see_progress(callback: CallbackQuery):
 #    await callback.message.answer('Прогресс ученика')
-@admin_router.callback_query((F.data=='Изменить ДЗ'), StateFilter(FSMtraining.admin))
+@admin_router.callback_query((F.data == 'Изменить ДЗ'), StateFilter(FSMtraining.admin))
 async def edit_hw(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer('Изменить ДЗ')
+
+
 @admin_router.callback_query(F.data == 'Посмотреть выученные слова')
 async def see_done_words(callback: CallbackQuery):
     await callback.message.answer('Посмотреть выученные слова')
     await callback.answer()
 
-@admin_router.callback_query(F.data=='progress')
-async def process_button_2_press(callback: CallbackQuery):
-    #await callback.message.edit_text(
-     #   text='Была нажата КНОПКА ',
-     #   reply_markup=callback.message.reply_markup)
-    await callback.message.answer('printed')
-    await get_users_list()
 
+@admin_router.callback_query(F.data == 'progress')
+async def process_button_2_press(callback: CallbackQuery):
+    # await callback.message.edit_text(
+    #   text='Была нажата КНОПКА ',
+    #   reply_markup=callback.message.reply_markup)
+    DICT = await get_users_dict()
+    await callback.message.answer('text', reply_markup=create_inline_kb(1, **DICT))
