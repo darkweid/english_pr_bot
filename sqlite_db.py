@@ -68,6 +68,11 @@ async def check_hw(user_id):
     else:
         return None
 
+async def get_users_list():
+    cursor.execute("SELECT user_id, username, name FROM users")
+    row = cursor.fetchone()
+    print(row)
+
 
 dict_hw = {
     1: 'hw1', 2: 'hw2', 3: 'hw3', 4: 'hw4', 5: 'hw5', 6: 'hw6', 7: 'hw7', 8: 'hw8', 9: 'hw9',

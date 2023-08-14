@@ -10,7 +10,7 @@ from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 # from keyboards.kb_utils import create_inline_kb, create_reply_kb
 from keyboards.keyboards import (kb_training_or_new_words, kb_training_go,
                                  kb_training_choise_lvl, kb_training_in_game)
-from states.states import FSMtraining, FSMdict
+from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
 from sqlite_db import create_profile, edit_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress
 
