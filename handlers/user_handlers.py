@@ -12,11 +12,12 @@ from keyboards.keyboards import (kb_training_or_new_words, kb_training_go,
                                  kb_training_choise_lvl, kb_training_in_game)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
-from sqlite_db import create_profile, edit_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress
+from sqlite_db import create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress
 
 user_router: Router = Router()
 main_dict = {}
 done_lst = []
+flag = False
 
 
 @user_router.message(F.text == '[Сбросить машину состояний]')
@@ -30,7 +31,7 @@ async def training_new(message: Message, state: FSMContext):
 async def process_start_command(message: Message, state: FSMContext):
     await create_profile(message.from_user.id, message.from_user.username,
                          message.from_user.full_name)
-    with open('log.csv', 'w', encoding='utf-8') as log_file:
+    with open('log.csv', 'a', encoding='utf-8') as log_file:
         log_data = [
             str(message.from_user.id).ljust(16), str(message.from_user.full_name).ljust(20),
             str(message.from_user.username).ljust(15), str(message.from_user.is_bot).ljust(6),
@@ -52,6 +53,8 @@ async def process_start_command(message: Message, state: FSMContext):
 async def process_start_command_patron(message: Message, state: FSMContext):
     await message.answer(f"""⬇️ Чем займёмся сегодня? ⬇️""",
                          reply_markup=kb_training_or_new_words)
+    await create_profile(message.from_user.id, message.from_user.username,
+                         message.from_user.full_name)
 
 
 @user_router.message(
