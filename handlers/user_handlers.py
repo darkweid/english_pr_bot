@@ -12,7 +12,8 @@ from keyboards.keyboards import (kb_training_or_new_words, kb_training_go,
                                  kb_training_choise_lvl, kb_training_in_game)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
-from sqlite_db import create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress
+from sqlite_db import create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress, \
+    update_last_sentence, get_last_sentence
 
 user_router: Router = Router()
 main_dict = {}
@@ -24,6 +25,13 @@ flag = False
 async def training_new(message: Message, state: FSMContext):
     await message.answer('Сброшено!')
     await state.clear()
+
+
+@user_router.message(F.text == 'sentence')
+async def check_translation2(message: Message):
+    await get_last_sentence(message.from_user.id)
+    await message.answer(await get_last_sentence(message.from_user.id))
+    await message.answer(';;')
 
 
 # Этот хэндлер будет срабатывать на команду "/start" -
@@ -51,6 +59,8 @@ async def process_start_command(message: Message, state: FSMContext):
 @user_router.message(Command(commands=['start']), ~StateFilter(default_state))
 @user_router.message(F.text == 'Выход', ~StateFilter(default_state))
 async def process_start_command_patron(message: Message, state: FSMContext):
+    global flag
+    flag = True
     await message.answer(f"""⬇️ Чем займёмся сегодня? ⬇️""",
                          reply_markup=kb_training_or_new_words)
     await create_profile(message.from_user.id, message.from_user.username,
@@ -73,7 +83,8 @@ async def training_new(message: Message, state: FSMContext):
                      ~StateFilter(default_state))
 @user_router.message(F.text == ('Ок, начинаем'), ~StateFilter(default_state))
 async def training_old(message: Message, state: FSMContext):
-    global main_dict, level, word, done_lst
+    global main_dict, level, word, done_lst, flag
+    flag = True
     done_lst = await get_progress(message.from_user.id)  # подгружаем данные по прогрессу из БД
     level = await check_hw(message.from_user.id)  # проверяем уровень из БД
     main_dict = dict_dicts[level]  # ставим нужный словарь
@@ -81,6 +92,7 @@ async def training_old(message: Message, state: FSMContext):
     word = random.choice(
         [s for s in list(main_dict.values()) if s not in done_lst])
     await message.answer(f'Переводи следующее:\n{word}')
+    await update_last_sentence(message.from_user.id, word)
     await state.set_state(FSMtraining.in_process)
 
 
@@ -94,12 +106,14 @@ async def show_answer(message: Message, state: FSMContext):
         [s for s in list(main_dict.values()) if s not in done_lst])
     await message.answer(
         f'На ошибках учатся, так что продолжаем 😊\nПереводи следующее:\n{word}', reply_markup=ReplyKeyboardRemove())
+    await update_last_sentence(message.from_user.id, word)
 
 
 @user_router.message(StateFilter(FSMtraining.in_process))
 async def check_translation(message: Message, state: FSMContext):
-    global word, done_lst, main_dict, level
+    global word, done_lst, main_dict, level, flag
     done_lst = await get_progress(message.from_user.id)  # подгружаем прогресс из БД
+
     msg = message.text.lower()
     try:
         if main_dict[msg].lower() == word.lower():
@@ -123,21 +137,44 @@ async def check_translation(message: Message, state: FSMContext):
                 word = random.choice(
                     [s for s in list(main_dict.values()) if s not in done_lst])
                 await message.answer(f'Переводи следующее:\n{word}')
+                await update_last_sentence(message.from_user.id, word)
             else:  # переведены не все предложения, переводим следующее
                 word = random.choice([
                     s for s in list(main_dict.values()) if s not in done_lst
                 ])  # Выбираем случайное предложение, которое еще не было использовано
                 await message.answer(f'Переведи:\n{word}',
                                      reply_markup=ReplyKeyboardRemove())
+                await update_last_sentence(message.from_user.id, word)
 
         else:
             await message.answer(
                 'Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
                 reply_markup=kb_training_in_game)
     except KeyError:
-        await message.answer(
-            'Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
-            reply_markup=kb_training_in_game)
+        if flag == True:
+            await message.answer(
+                'Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
+                reply_markup=kb_training_in_game)
+        if flag == False:  # если был перезапуск бота и пользователь не совершал никаких действий
+            word = await get_last_sentence(message.from_user.id)
+            level = await check_hw(message.from_user.id)  # проверяем уровень из БД
+            main_dict = dict_dicts[level]  # ставим нужный словарь
+            done_lst = await get_progress(message.from_user.id)  # подгружаем прогресс из БД
+            try:
+                if main_dict[message.text.lower()].lower() == word.lower():
+                    done_lst.append(word)
+                    await update_progress(message.from_user.id, done_lst)
+                    await message.answer(random.choice(list_right_answers))
+                    word = random.choice([
+                        s for s in list(main_dict.values()) if s not in done_lst
+                    ])  # Выбираем случайное предложение, которое еще не было использовано
+                    await message.answer(f'Переведи:\n{word}',
+                                         reply_markup=ReplyKeyboardRemove())
+                    flag = True
+            except:
+                await message.answer(
+                    'Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
+                    reply_markup=kb_training_in_game)
 
 
 @user_router.message()
