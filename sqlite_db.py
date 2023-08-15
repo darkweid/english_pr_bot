@@ -22,7 +22,7 @@ async def create_profile(user_id, username, name):
     if not user:
         cursor.execute(
             "INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (user_id, username, name, 'None', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
+            (user_id, username, name, '[]', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
              'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
              'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
              'False',))
@@ -68,15 +68,31 @@ async def check_hw(user_id):
     else:
         return None
 
+
 async def get_users_dict():
     dict = {}
     cursor.execute("SELECT user_id, username, name FROM users")
     row = cursor.fetchall()
-    print(row)
     for elem in row:
         dict[elem[0]] = f'{elem[0]}: {elem[1]} {elem[2]}'
-    print (dict)
     return dict
+
+
+async def see_user_hw_progress(user_id):
+    result = cursor.execute(
+        "SELECT * FROM users WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    progress = ''
+    my_list = []
+    if len(result[3]) > 2:
+        my_list = json.loads(result[3])
+    hw_number = result.index('False') - 3
+    if len(my_list) > 0:
+        progress = f'Сейчас выполнено {len(my_list)} предложений в Д/З №{hw_number}\n'
+    final_result = ''
+    final_result = progress
+    for i in range(1, 33):
+        final_result += f"""ДЗ №{i}: {'✅Выполнено' if result[i+3] == 'True' else '❌Не выполнено'}\n"""
+    return final_result
 
 
 dict_hw = {

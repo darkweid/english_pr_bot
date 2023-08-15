@@ -8,8 +8,13 @@ from aiogram.filters.state import State, StatesGroup
 class FSMtraining(StatesGroup):
 ####### Создаем экземпляры класса State, перечисляя возможные состояния, в которых будет находиться бот #######
     patron_user = State()               # Старый пользователь
-    in_process = State()            #Проходит уровень 3 тренажера
-    admin = State()             # в админке
+    in_process = State()                #проходит тренажер ДЗ
+
+class FSMadmin(StatesGroup):
+    admin = State()     # в админке
+    admin_see_progress_hw = State()
+    admin_change_hw = State()
+    admin_progress_words = State()
 class FSMwords(StatesGroup):
 ####### Создаем экземпляры класса State, перечисляя возможные состояния, в которых будет находиться бот #######
     fill_name = State()        # Состояние ожидания ввода имени
