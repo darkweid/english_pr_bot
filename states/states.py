@@ -12,9 +12,9 @@ class FSMtraining(StatesGroup):
 
 class FSMadmin(StatesGroup):
     admin = State()     # в админке
-    admin_see_progress_hw = State()
-    admin_change_hw = State()
-    admin_progress_words = State()
+    see_progress_hw = State()
+    edit_hw = State()
+    progress_words = State()
 class FSMwords(StatesGroup):
 ####### Создаем экземпляры класса State, перечисляя возможные состояния, в которых будет находиться бот #######
     fill_name = State()        # Состояние ожидания ввода имени

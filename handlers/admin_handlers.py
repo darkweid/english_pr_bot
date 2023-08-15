@@ -86,13 +86,13 @@ async def process_admin_command(message: Message, state: FSMContext):
 
 @admin_router.callback_query(F.data == 'progress', StateFilter(FSMadmin.admin))
 async def see_progress(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(FSMadmin.admin_see_progress_hw)
+    await state.set_state(FSMadmin.see_progress_hw)
     DICT = await get_users_dict()
     await callback.message.edit_text(text='Чей прогресс будем смотреть?', reply_markup=create_inline_kb(1, last_btn = 'Выход', **DICT))
 
 @admin_router.callback_query((F.data == 'Изменить ДЗ'), StateFilter(FSMadmin.admin))
 async def edit_hw(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(FSMadmin.admin_change_hw)
+    await state.set_state(FSMadmin.change_hw)
     DICT = await get_users_dict()
     await callback.message.edit_text(text='Чей прогресс по ДЗ изменить?',
                                      reply_markup=create_inline_kb(1, last_btn='Выход', **DICT))
@@ -100,21 +100,24 @@ async def edit_hw(callback: CallbackQuery, state: FSMContext):
 
 @admin_router.callback_query(F.data == 'Посмотреть выученные слова', StateFilter(FSMadmin.admin))
 async def see_done_words(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(FSMadmin.admin_progress_words)
+    await state.set_state(FSMadmin.progress_words)
     DICT = await get_users_dict()
     await callback.message.edit_text(text='Чей прогресс по выученным словам будем смотреть?',
                                      reply_markup=create_inline_kb(1, last_btn='Выход', **DICT))
 
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.admin_see_progress_hw))
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.admin_change_hw))
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.admin_progress_words))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.see_progress_hw))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.progress_words))
 async def exit(callback: CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text('Что будем делать, хозяин?', reply_markup=keyboard_adm)
     await state.set_state(FSMadmin.admin)
 
-@admin_router.callback_query(StateFilter(FSMadmin.admin_see_progress_hw))
+@admin_router.callback_query(StateFilter(FSMadmin.see_progress_hw))
 async def check_hw_progress(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(FSMadmin.admin_see_progress_hw)
+    await callback.message.edit_text(text=await see_user_hw_progress(callback.data.split(':')[0]), reply_markup=keyboard_exit)
+
+@admin_router.callback_query(StateFilter(FSMadmin.edit_hw))
+async def edit_hw_progress(callback: CallbackQuery, state: FSMContext):
     DICT = await get_users_dict()
     await callback.message.edit_text(text=await see_user_hw_progress(callback.data.split(':')[0]), reply_markup=keyboard_exit)
