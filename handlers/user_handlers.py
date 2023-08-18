@@ -104,6 +104,7 @@ async def show_answer(message: Message, state: FSMContext):
     await message.answer(inv_dict[word])
     word = random.choice(
         [s for s in list(main_dict.values()) if s not in done_lst])
+    await update_last_sentence(message.from_user.id, word)
     await message.answer(
         f'На ошибках учатся, так что продолжаем 😊\nПереводи следующее:\n{word}', reply_markup=ReplyKeyboardRemove())
     await update_last_sentence(message.from_user.id, word)

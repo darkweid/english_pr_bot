@@ -78,11 +78,13 @@ keyboard_exit: InlineKeyboardMarkup = InlineKeyboardMarkup(
 
 
 # admin_handlers
-@admin_router.message(Command(commands=["admin"]), F.from_user.id == superadmin)
+@admin_router.message(Command(commands=["admin"]))
 async def process_admin_command(message: Message, state: FSMContext):
-    await message.answer('Что будем делать, хозяин?', reply_markup=keyboard_adm)
-    print(superadmin)
-    await state.set_state(FSMadmin.admin)
+    if str(message.from_user.id) in ADMINS:
+        await message.answer('Что будем делать, хозяин?', reply_markup=keyboard_adm)
+        await state.set_state(FSMadmin.admin)
+    else:
+        await message.answer('Вам сюда нельзя')
 
 
 @admin_router.callback_query(F.data == 'see_progress', StateFilter(FSMadmin.admin))
