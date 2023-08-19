@@ -1,20 +1,12 @@
-from aiogram.fsm.context import FSMContext
-import asyncio, random, json, csv, time
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery, BotCommand, URLInputFile
-from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove, ContentType
+
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from config_data.config import Config, load_config
 from aiogram import Router, F
 from aiogram.filters import Command, StateFilter
-from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import default_state
-from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
-# from keyboards.kb_utils import create_inline_kb, create_reply_kb
-from keyboards.keyboards import (kb_training_or_new_words, kb_training_go,
-                                 kb_training_choise_lvl, kb_training_in_game)
+from aiogram.types import CallbackQuery, Message
 from states.states import FSMadmin
-from files.dicts import (dict_dicts, list_right_answers)
 from sqlite_db import (create_profile, edit_hw_done, edit_hw_undone, check_hw, dict_hw, update_progress,
                        get_progress,
                        get_users_dict, see_user_hw_progress)

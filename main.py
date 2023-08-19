@@ -1,10 +1,6 @@
-import csv, time, asyncio, logging
-# from background import keep_alive
+import asyncio, logging
 
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery, BotCommand, URLInputFile
-from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove, ContentType
+from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage, Redis
 from config_data.config import Config, load_config
 from handlers.user_handlers import user_router
@@ -57,6 +53,5 @@ async def main():
 if __name__ == "__main__":
     try:
         asyncio.run(main())
-        #    keep_alive()
     except (KeyboardInterrupt, SystemExit):
         logging.info("Bot stopped!")

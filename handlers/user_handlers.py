@@ -1,15 +1,12 @@
-from aiogram.fsm.context import FSMContext
-import asyncio, random, json, csv, time
+import random, csv, time
 
 from aiogram import Router, F
-from aiogram.filters import Command, CommandStart, StateFilter
-from aiogram.filters.state import State, StatesGroup
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
-# from keyboards.kb_utils import create_inline_kb, create_reply_kb
-from keyboards.keyboards import (kb_training_or_new_words, kb_training_go,
-                                 kb_training_choise_lvl, kb_training_in_game)
+
+from keyboards.keyboards import (kb_training_or_new_words, kb_training_go, kb_training_in_game, kb_rules)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
 from sqlite_db import create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress, \
@@ -27,15 +24,20 @@ async def training_new(message: Message, state: FSMContext):
     await state.clear()
 
 
-@user_router.message(F.text == 'sentence')
-async def check_translation2(message: Message):
-    await get_last_sentence(message.from_user.id)
-    await message.answer(await get_last_sentence(message.from_user.id))
-    await message.answer(';;')
+@user_router.message(F.text == ('Новые слова [В разработке]'))
+async def new_words_pass(message: Message):
+    await message.answer(
+        f'Извини, {message.from_user.full_name}, тренажер для запоминания слов находится в разработке 😊')
+
+
+@user_router.message(Command(commands=["rules"]))
+async def process_start_command(message: Message):
+    await message.answer('Правила', reply_markup=kb_rules)
 
 
 # Этот хэндлер будет срабатывать на команду "/start" -
 @user_router.message(Command(commands=["start"]), StateFilter(default_state))
+@user_router.message(F.text == 'Ок, понятно', StateFilter(default_state))
 async def process_start_command(message: Message, state: FSMContext):
     await create_profile(message.from_user.id, message.from_user.username,
                          message.from_user.full_name)
@@ -46,7 +48,7 @@ async def process_start_command(message: Message, state: FSMContext):
             time.strftime('%H:%M :: %d/%m/%Y'), time.tzname]
         writer = csv.writer(log_file, delimiter=',')
         writer.writerow(log_data)
-    await message.answer(f"""Привет! Я бот от Оли Прус : )
+    await message.answer(f"""Привет,{message.from_user.full_name}! Я бот от Оли Прус : )
 \nПомогаю людям изучать английский.
 Пока что у меня две функции:
 – тренажер по грамматике
@@ -58,6 +60,7 @@ async def process_start_command(message: Message, state: FSMContext):
 # Этот хэндлер будет срабатывать на команду "/start" -
 @user_router.message(Command(commands=['start']), ~StateFilter(default_state))
 @user_router.message(F.text == 'Выход', ~StateFilter(default_state))
+@user_router.message(F.text == 'Ок, понятно', ~StateFilter(default_state))
 async def process_start_command_patron(message: Message, state: FSMContext):
     global flag
     flag = True
