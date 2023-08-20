@@ -1,4 +1,4 @@
-import asyncio, logging
+import asyncio, logging, sqlite_db
 
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage, Redis
@@ -6,7 +6,6 @@ from config_data.config import Config, load_config
 from handlers.user_handlers import user_router
 from handlers.admin_handlers import admin_router
 from keyboards.set_menu import set_main_menu
-import sqlite_db
 
 # Инициализируем логгер
 logger = logging.getLogger(__name__)

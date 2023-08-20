@@ -1,12 +1,19 @@
-
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.fsm.context import FSMContext
+import asyncio, random, json, csv, time
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery, BotCommand, URLInputFile
+from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove, ContentType
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from config_data.config import Config, load_config
 from aiogram import Router, F
 from aiogram.filters import Command, StateFilter
+from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.fsm.state import default_state
+from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
+# from keyboards.kb_utils import create_inline_kb, create_reply_kb
+
 from states.states import FSMadmin
+from files.dicts import (dict_dicts, list_right_answers)
 from sqlite_db import (create_profile, edit_hw_done, edit_hw_undone, check_hw, dict_hw, update_progress,
                        get_progress,
                        get_users_dict, see_user_hw_progress)
@@ -107,8 +114,8 @@ async def see_done_words(callback: CallbackQuery, state: FSMContext):
 @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
 @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.progress_words))
 @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
-@admin_router.callback_query(F.data == 'Выход',StateFilter(FSMadmin.edit_hw_got_user_id))
-@admin_router.callback_query(F.data == 'Выход',StateFilter(FSMadmin.edit_hw_got_user_id_and_hw_number))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id_and_hw_number))
 async def exit(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text('Что будем делать, хозяин?', reply_markup=keyboard_adm)
     await state.set_state(FSMadmin.admin)
@@ -147,9 +154,9 @@ async def edit_hw_process4(callback: CallbackQuery, state: FSMContext):
     if callback.data == '✅ Выполнено ✅':
         await edit_hw_done((user_id), dict_hw[hw_number])
         await callback.answer('Изменено успешно!', show_alert=True)
-        await update_progress(user_id)              #сбрасываем предложения "в процессе"
+        await update_progress(user_id)  # сбрасываем предложения "в процессе"
 
     elif callback.data == '❌ Не выполнено ❌':
         await edit_hw_undone((user_id), dict_hw[hw_number])
         await callback.answer('Изменено успешно!', show_alert=True)
-        await update_progress(user_id)              #сбрасываем предложения "в процессе"
+        await update_progress(user_id)  # сбрасываем предложения "в процессе"

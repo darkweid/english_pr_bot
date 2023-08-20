@@ -57,6 +57,7 @@ async def update_progress(user_id, data=[]):
         "UPDATE users SET progress = '{}' WHERE user_id == '{}'".format(list_as_text, user_id))
     db.commit()
 
+
 async def get_last_sentence(user_id):
     cursor.execute("SELECT last_sentence FROM users WHERE user_id=='{}'".format(user_id))
     row = cursor.fetchone()
@@ -73,6 +74,7 @@ async def update_last_sentence(user_id, data=[]):
     cursor.execute(
         "UPDATE users SET last_sentence = '{}' WHERE user_id == '{}'".format(str_as_text, user_id))
     db.commit()
+
 
 async def check_hw(user_id):
     result = cursor.execute(

@@ -1,11 +1,13 @@
-import random, csv, time
+from aiogram.fsm.context import FSMContext
+import asyncio, random, json, csv, time
 
 from aiogram import Router, F
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import Command, CommandStart, StateFilter
+from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
-
+# from keyboards.kb_utils import create_inline_kb, create_reply_kb
 from keyboards.keyboards import (kb_training_or_new_words, kb_training_go, kb_training_in_game, kb_rules)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
@@ -32,7 +34,9 @@ async def new_words_pass(message: Message):
 
 @user_router.message(Command(commands=["rules"]))
 async def process_start_command(message: Message):
-    await message.answer('Правила', reply_markup=kb_rules)
+    await message.answer(
+        f"""Весь прогресс сохраняется в памяти бота\nРегистр введенных предложений/слов не имеет значения.\nНе используйте сокращения «don't», «it's», используйте полные формы «do not», «it is»\nВ любой непонятной ситуации нажимай команду /start и выбирай чем хочешь заниматься 😊""",
+        reply_markup=kb_rules)
 
 
 # Этот хэндлер будет срабатывать на команду "/start" -
@@ -91,7 +95,8 @@ async def training_old(message: Message, state: FSMContext):
     done_lst = await get_progress(message.from_user.id)  # подгружаем данные по прогрессу из БД
     level = await check_hw(message.from_user.id)  # проверяем уровень из БД
     main_dict = dict_dicts[level]  # ставим нужный словарь
-    await message.answer(f"""Ты находишься на уровне {level}""", reply_markup=ReplyKeyboardRemove())
+    await message.answer(f"""Ты находишься на уровне {level}\nПереведено {len(done_lst)}\nВсего {len(main_dict)}""",
+                         reply_markup=ReplyKeyboardRemove())
     word = random.choice(
         [s for s in list(main_dict.values()) if s not in done_lst])
     await message.answer(f'Переводи следующее:\n{word}')
@@ -110,6 +115,7 @@ async def show_answer(message: Message, state: FSMContext):
     await update_last_sentence(message.from_user.id, word)
     await message.answer(
         f'На ошибках учатся, так что продолжаем 😊\nПереводи следующее:\n{word}', reply_markup=ReplyKeyboardRemove())
+    await message.answer(f'Переводи следующее:\n{word}', reply_markup=ReplyKeyboardRemove())
     await update_last_sentence(message.from_user.id, word)
 
 
@@ -152,12 +158,12 @@ async def check_translation(message: Message, state: FSMContext):
 
         else:
             await message.answer(
-                'Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
+                '❌ Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
                 reply_markup=kb_training_in_game)
     except KeyError:
         if flag == True:
             await message.answer(
-                'Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
+                '❌ Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
                 reply_markup=kb_training_in_game)
         if flag == False:  # если был перезапуск бота и пользователь не совершал никаких действий
             word = await get_last_sentence(message.from_user.id)
@@ -177,7 +183,7 @@ async def check_translation(message: Message, state: FSMContext):
                     flag = True
             except:
                 await message.answer(
-                    'Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
+                    '❌ Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
                     reply_markup=kb_training_in_game)
 
 
