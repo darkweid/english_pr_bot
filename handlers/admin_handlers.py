@@ -19,7 +19,6 @@ from sqlite_db import (create_profile, edit_hw_done, edit_hw_undone, check_hw, d
                        get_users_dict, see_user_hw_progress)
 
 
-
 # Функция для формирования инлайн-клавиатуры на лету
 # Функция для генерации инлайн-клавиатур "на лету"
 def create_inline_kb(width: int,
@@ -61,6 +60,7 @@ BOT_TOKEN: str = config.tg_bot.token
 bot: Bot = Bot(token=BOT_TOKEN, parse_mode='HTML')
 ADMINS: list = config.tg_bot.admin_ids
 superadmin = ADMINS[0]
+
 
 async def send_message_to_admin(bot: Bot, text=''):
     for elem in ADMINS:

@@ -33,7 +33,6 @@ async def new_words_pass(message: Message):
         f'Извини, {message.from_user.full_name}, тренажер для запоминания слов находится в разработке 😊')
 
 
-
 @user_router.message(Command(commands=["rules"]))
 async def process_start_command(message: Message):
     await message.answer(
@@ -61,7 +60,8 @@ async def process_start_command(message: Message, state: FSMContext):
 – запоминание новых слов
 \n⬇️ Выбери, с чего начнём сегодня ⬇️""",
                          reply_markup=kb_training_or_new_words)
-    await send_message_to_admin(bot, text=f'Зарегистрирован новый пользователь!\n{message.from_user.full_name}\n@{message.from_user.username}')
+    await send_message_to_admin(bot,
+                                text=f'Зарегистрирован новый пользователь!\n{message.from_user.full_name}\n@{message.from_user.username}')
 
 
 # Этот хэндлер будет срабатывать на команду "/start" -
