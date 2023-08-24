@@ -18,7 +18,6 @@ from handlers.admin_handlers import send_message_to_admin, bot
 user_router: Router = Router()
 main_dict = {}
 done_lst = []
-flag = False
 
 
 @user_router.message(F.text == '[Сбросить машину состояний]')
@@ -69,8 +68,6 @@ async def process_start_command(message: Message, state: FSMContext):
 @user_router.message(F.text == 'Выход', ~StateFilter(default_state))
 @user_router.message(F.text == 'Ок, понятно', ~StateFilter(default_state))
 async def process_start_command_patron(message: Message, state: FSMContext):
-    global flag
-    flag = True
     await message.answer(f"""⬇️ Чем займёмся сегодня? ⬇️""",
                          reply_markup=kb_training_or_new_words)
     await create_profile(message.from_user.id, message.from_user.username,
@@ -93,8 +90,6 @@ async def training_new(message: Message, state: FSMContext):
                      ~StateFilter(default_state))
 @user_router.message(F.text == ('Ок, начинаем'), ~StateFilter(default_state))
 async def training_old(message: Message, state: FSMContext):
-    global main_dict, level, word, done_lst, flag
-    flag = True
     done_lst = await get_progress(message.from_user.id)  # подгружаем данные по прогрессу из БД
     level = await check_hw(message.from_user.id)  # проверяем уровень из БД
     main_dict = dict_dicts[level]  # ставим нужный словарь
@@ -110,7 +105,9 @@ async def training_old(message: Message, state: FSMContext):
 @user_router.message(F.text == 'Покажи ответ',
                      StateFilter(FSMtraining.in_process))
 async def show_answer(message: Message, state: FSMContext):
-    global word
+    word = await get_last_sentence(message.from_user.id)  # подгружаем последнее предложение из БД
+    level = await check_hw(message.from_user.id)  # проверяем уровень из БД
+    main_dict = dict_dicts[level]  # ставим нужный словарь
     inv_dict = {value: key for key, value in main_dict.items()}
     await message.answer(inv_dict[word])
     word = random.choice(
@@ -123,12 +120,13 @@ async def show_answer(message: Message, state: FSMContext):
 
 @user_router.message(StateFilter(FSMtraining.in_process))
 async def check_translation(message: Message, state: FSMContext):
-    global word, done_lst, main_dict, level, flag
+    word = await get_last_sentence(message.from_user.id)  # подгружаем последнее предложение из БД
     done_lst = await get_progress(message.from_user.id)  # подгружаем прогресс из БД
+    level = await check_hw(message.from_user.id)  # проверяем уровень из БД
+    main_dict = dict_dicts[level]  # ставим нужный словарь
     msg = message.text.lower()
     try:
         if main_dict[msg].lower() == word.lower():  # перевод верный
-            flag = True
             done_lst.append(word)  # добавляем переведенное предл в список done
             await update_progress(message.from_user.id, done_lst)  # обновляем выполненные в БД
             await message.answer(random.choice(list_right_answers))  # пишем, что пользователь молодец))
@@ -159,34 +157,13 @@ async def check_translation(message: Message, state: FSMContext):
                 await update_last_sentence(message.from_user.id, word)
 
         else:
-            await message.answer(
-                '❌ Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
-                reply_markup=kb_training_in_game)
+            await message.answer('❌ Хм, у меня другой ответ 🤔')
+            await message.answer('<u>Попробуй ещё раз</u> или попроси меня показать ответ 😉',
+                                 reply_markup=kb_training_in_game)
     except KeyError:
-        if flag == True:
-            await message.answer(
-                '❌ Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
-                reply_markup=kb_training_in_game)
-        if flag == False:  # если был перезапуск бота и пользователь не совершал никаких действий
-            word = await get_last_sentence(message.from_user.id)
-            level = await check_hw(message.from_user.id)  # проверяем уровень из БД
-            main_dict = dict_dicts[level]  # ставим нужный словарь
-            done_lst = await get_progress(message.from_user.id)  # подгружаем прогресс из БД
-            try:
-                if main_dict[message.text.lower()].lower() == word.lower():
-                    done_lst.append(word)
-                    await update_progress(message.from_user.id, done_lst)
-                    await message.answer(random.choice(list_right_answers))
-                    word = random.choice([
-                        s for s in list(main_dict.values()) if s not in done_lst
-                    ])  # Выбираем случайное предложение, которое еще не было использовано
-                    await message.answer(f'Переведи:\n{word}',
-                                         reply_markup=ReplyKeyboardRemove())
-                    flag = True
-            except:
-                await message.answer(
-                    '❌ Хм, у меня другой ответ 🤔\nПопробуй ещё раз или попроси меня подсказать ответ 😉',
-                    reply_markup=kb_training_in_game)
+        await message.answer('❌ Хм, у меня другой ответ 🤔')
+        await message.answer('<u>Попробуй ещё раз</u> или попроси меня показать ответ 😉',
+                             reply_markup=kb_training_in_game)
 
 
 @user_router.message()
