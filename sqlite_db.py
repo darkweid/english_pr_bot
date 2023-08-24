@@ -1,5 +1,6 @@
 import sqlite3 as sq
 import json
+from files.dicts import dict_dicts
 
 
 # Database
@@ -101,8 +102,9 @@ async def see_user_hw_progress(user_id):
     if len(result[3]) > 2:
         my_list = json.loads(result[3])
     hw_number = result.index('False') - 3
+    dct = dict_dicts[hw_number]
     if len(my_list) > 0:
-        progress = f'Сейчас выполнено {len(my_list)} предложений в Д/З №{hw_number}\n'
+        progress = f'Сейчас выполнено {len(my_list)} предложений из {len(dct)}\nв Д/З №{hw_number}\n\n'
     final_result = ''
     final_result = progress
     for i in range(1, 33):
