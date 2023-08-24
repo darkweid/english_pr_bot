@@ -319,7 +319,7 @@ dict_training_words4 = {
         'Он вышел [go out] чтобы купить нам немного [some] кофе',
     'we went out to have lunch':
         'Мы вышли чтобы пообедать',
-    'he starts his day with cofee to feel better':
+    'he starts his day with coffee to feel better':
         'Он начинает свой день с [with] кофе чтобы чувствовать себя лучше',
     'she worked even at weekends to make more money':
         'Она работала даже [even] по выходным [at weekends] чтобы сделать [make] больше денег.',

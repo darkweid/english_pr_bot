@@ -65,14 +65,13 @@ async def get_last_sentence(user_id):
         list_as_text = row[0]
         my_list = json.loads(list_as_text)
         return my_list
-    print(my_list)
     db.commit()
 
 
 async def update_last_sentence(user_id, data=[]):
     str_as_text = json.dumps(data)
     cursor.execute(
-        "UPDATE users SET last_sentence = '{}' WHERE user_id == '{}'".format(str_as_text, user_id))
+        "UPDATE users SET last_sentence = ? WHERE user_id == ?", (str_as_text, user_id))
     db.commit()
 
 
