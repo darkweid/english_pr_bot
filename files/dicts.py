@@ -311,8 +311,8 @@ dict_training_words4 = {
         'Ты ходил на кухню [the kitchen] чтобы выпить немного кофе? (have some coffee)',
     'he gets up at 5:30 every day to go to work':
         'Он встает в 5:30 каждый день чтобы поехать на работу [get up]',
-    'we finish at 6 and i call my friends to meet up in a café':
-        'Мы заканчиваем в 6 и я звоню своим друзьям чтобы собраться в кафе (meet up in a café)',
+    'we finish at 6 and i call my friends to meet up in a cafe':
+        'Мы заканчиваем в 6 и я звоню своим друзьям чтобы собраться в кафе (meet up in a cafe)',
     'she was too worried to go straight to bed':
         'Она была слишком обеспокоена [worried] чтобы идти прямо в кровать [go straight to bed] (в смысле "идти сразу спать")',
     'he went out to buy us some coffee':
@@ -444,8 +444,8 @@ dict_training_words5 = {
         'Мы работаем до обеда и затем делаем перерыв и выходим на улицу чтобы купить немного кофе',
     'we usually finish at 6 and when i leave work i call my friends':
         'Мы обычно [usually] заканчиваем в 6 и когда я ухожу с работы [leave work] я звоню своим друзьям',
-    'and we meet up in a café because it is usually too cold outside':
-        'И мы собираемся в кафе [meet up in a café] потому что на улице обычно слишком холодно',
+    'and we meet up in a cafe because it is usually too cold outside':
+        'И мы собираемся в кафе [meet up in a cafe] потому что на улице обычно слишком холодно',
     'we talk about work for some time and then we just have fun':
         'мы говорим о работе в течение какого-то времени а затем [and then] мы просто [just] веселимся',
     'i do not live downtown, so it takes me 2 hours to get home':
