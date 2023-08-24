@@ -1,7 +1,7 @@
 from aiogram.fsm.context import FSMContext
 import asyncio, random, json, csv, time
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -11,8 +11,9 @@ from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from keyboards.keyboards import (kb_training_or_new_words, kb_training_go, kb_training_in_game, kb_rules)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
-from sqlite_db import create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress, \
-    update_last_sentence, get_last_sentence
+from sqlite_db import (create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress,
+                       update_last_sentence, get_last_sentence)
+from handlers.admin_handlers import send_message_to_admin, bot
 
 user_router: Router = Router()
 main_dict = {}
@@ -30,6 +31,7 @@ async def training_new(message: Message, state: FSMContext):
 async def new_words_pass(message: Message):
     await message.answer(
         f'Извини, {message.from_user.full_name}, тренажер для запоминания слов находится в разработке 😊')
+
 
 
 @user_router.message(Command(commands=["rules"]))
@@ -59,6 +61,7 @@ async def process_start_command(message: Message, state: FSMContext):
 – запоминание новых слов
 \n⬇️ Выбери, с чего начнём сегодня ⬇️""",
                          reply_markup=kb_training_or_new_words)
+    await send_message_to_admin(bot, text=f'Зарегистрирован новый пользователь!\n{message.from_user.full_name}\n@{message.from_user.username}')
 
 
 # Этот хэндлер будет срабатывать на команду "/start" -
@@ -114,22 +117,21 @@ async def show_answer(message: Message, state: FSMContext):
         [s for s in list(main_dict.values()) if s not in done_lst])
     await update_last_sentence(message.from_user.id, word)
     await message.answer(
-        f'На ошибках учатся, так что продолжаем 😊\nПереводи следующее:\n{word}', reply_markup=ReplyKeyboardRemove())
-    await message.answer(f'Переводи следующее:\n{word}', reply_markup=ReplyKeyboardRemove())
-    await update_last_sentence(message.from_user.id, word)
+        f'На ошибках учатся, так что продолжаем 😊\n', reply_markup=ReplyKeyboardRemove())
+    await message.answer(f'Переводи следующее:\n{word}')
 
 
 @user_router.message(StateFilter(FSMtraining.in_process))
 async def check_translation(message: Message, state: FSMContext):
     global word, done_lst, main_dict, level, flag
     done_lst = await get_progress(message.from_user.id)  # подгружаем прогресс из БД
-
     msg = message.text.lower()
     try:
-        if main_dict[msg].lower() == word.lower():
-            done_lst.append(word)
-            await update_progress(message.from_user.id, done_lst)
-            await message.answer(random.choice(list_right_answers))
+        if main_dict[msg].lower() == word.lower():  # перевод верный
+            flag = True
+            done_lst.append(word)  # добавляем переведенное предл в список done
+            await update_progress(message.from_user.id, done_lst)  # обновляем выполненные в БД
+            await message.answer(random.choice(list_right_answers))  # пишем, что пользователь молодец))
             if len(done_lst) == len(
                     main_dict
             ):  # Все предложения переведены, переход на следующий уровень
