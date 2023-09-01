@@ -70,10 +70,13 @@ async def get_last_sentence(user_id):
 
 
 async def update_last_sentence(user_id, data=[]):
-    str_as_text = json.dumps(data)
-    cursor.execute(
-        "UPDATE users SET last_sentence = ? WHERE user_id == ?", (str_as_text, user_id))
-    db.commit()
+    try:
+        str_as_text = json.dumps(data)
+        cursor.execute(
+            "UPDATE users SET last_sentence = ? WHERE user_id == ?", (str_as_text, user_id))
+        db.commit()
+    except:
+        print(f'Ошибка в функции update_last_sentence\n{user_id}\n{data}')
 
 
 async def check_hw(user_id):
