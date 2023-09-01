@@ -3,11 +3,9 @@ import asyncio, random, json, csv, time
 
 from aiogram import Router, F, Bot
 from aiogram.filters import Command, CommandStart, StateFilter
-from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
-# from keyboards.kb_utils import create_inline_kb, create_reply_kb
 from keyboards.keyboards import (kb_training_or_new_words, kb_training_go, kb_training_in_game, kb_rules)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
@@ -95,39 +93,42 @@ async def training_old(message: Message, state: FSMContext):
     main_dict = dict_dicts[level]  # ставим нужный словарь
     await message.answer(f"""Ты находишься на уровне {level}\nПереведено {len(done_lst)}\nВсего {len(main_dict)}""",
                          reply_markup=ReplyKeyboardRemove())
-    word = random.choice(
+    sentence = random.choice(
         [s for s in list(main_dict.values()) if s not in done_lst])
-    await message.answer(f'Переводи следующее:\n{word}')
-    await update_last_sentence(message.from_user.id, word)
+    await message.answer(f'Переводи следующее:\n{sentence}')
+    await update_last_sentence(message.from_user.id, sentence)
     await state.set_state(FSMtraining.in_process)
 
 
 @user_router.message(F.text == 'Покажи ответ',
                      StateFilter(FSMtraining.in_process))
 async def show_answer(message: Message, state: FSMContext):
-    word = await get_last_sentence(message.from_user.id)  # подгружаем последнее предложение из БД
+    sentence = await get_last_sentence(message.from_user.id)  # подгружаем последнее предложение из БД
     level = await check_hw(message.from_user.id)  # проверяем уровень из БД
     main_dict = dict_dicts[level]  # ставим нужный словарь
     inv_dict = {value: key for key, value in main_dict.items()}
-    await message.answer(inv_dict[word])
-    word = random.choice(
+    await message.answer(inv_dict[sentence])
+    sentence = random.choice(
         [s for s in list(main_dict.values()) if s not in done_lst])
-    await update_last_sentence(message.from_user.id, word)
+    await update_last_sentence(message.from_user.id, sentence)
     await message.answer(
         f'На ошибках учатся, так что продолжаем 😊\n', reply_markup=ReplyKeyboardRemove())
-    await message.answer(f'Переводи следующее:\n{word}')
+    await message.answer(f'Переводи следующее:\n{sentence}')
 
 
 @user_router.message(StateFilter(FSMtraining.in_process))
 async def check_translation(message: Message, state: FSMContext):
-    word = await get_last_sentence(message.from_user.id)  # подгружаем последнее предложение из БД
+    sentence = await get_last_sentence(message.from_user.id)  # подгружаем последнее предложение из БД
     done_lst = await get_progress(message.from_user.id)  # подгружаем прогресс из БД
     level = await check_hw(message.from_user.id)  # проверяем уровень из БД
     main_dict = dict_dicts[level]  # ставим нужный словарь
-    msg = message.text.lower()
+    if message.text is not None:
+        msg = message.text.lower()
+    else:
+        msg = ''
     try:
-        if main_dict[msg].lower() == word.lower():  # перевод верный
-            done_lst.append(word)  # добавляем переведенное предл в список done
+        if main_dict[msg].lower() == sentence.lower():  # перевод верный
+            done_lst.append(sentence)  # добавляем переведенное предл в список done
             await update_progress(message.from_user.id, done_lst)  # обновляем выполненные в БД
             await message.answer(random.choice(list_right_answers))  # пишем, что пользователь молодец))
             if len(done_lst) == len(
@@ -144,17 +145,17 @@ async def check_translation(message: Message, state: FSMContext):
                                       )  # обнуляем список переведенных в БД
                 main_dict = dict_dicts[level]  # меняем словарь на новый уровень
                 await message.answer(f"""Теперь ты находишься на уровне {level}""")
-                word = random.choice(
+                sentence = random.choice(
                     [s for s in list(main_dict.values()) if s not in done_lst])
-                await message.answer(f'Переводи следующее:\n{word}')
-                await update_last_sentence(message.from_user.id, word)
+                await message.answer(f'Переводи следующее:\n{sentence}')
+                await update_last_sentence(message.from_user.id, sentence)
             else:  # переведены не все предложения, переводим следующее
-                word = random.choice([
+                sentence = random.choice([
                     s for s in list(main_dict.values()) if s not in done_lst
                 ])  # Выбираем случайное предложение, которое еще не было использовано
-                await message.answer(f'Переведи:\n{word}',
+                await message.answer(f'Переведи:\n{sentence}',
                                      reply_markup=ReplyKeyboardRemove())
-                await update_last_sentence(message.from_user.id, word)
+                await update_last_sentence(message.from_user.id, sentence)
 
         else:
             await message.answer('❌ Хм, у меня другой ответ 🤔')
