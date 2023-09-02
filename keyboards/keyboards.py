@@ -25,7 +25,8 @@ kb_training_in_game: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
     keyboard=[[btn_show_answer], [btn_exit]], resize_keyboard=True)
 
 # Создаем кнопки Inline
-# button: InlineKeyboardButton = InlineKeyboardButton(
-#    text='---', url=url_blabla)
+btn_training_rules: InlineKeyboardButton = InlineKeyboardButton(
+    text='🙋‍♀️ Посмотреть правила 🙋', callback_data='Посмотреть правила тренажера')
 
 # Создаем объекты Inline–клавиатуры
+kb_training_rules_inline : InlineKeyboardMarkup = InlineKeyboardMarkup(inline_keyboard= [[btn_training_rules]])
