@@ -96,7 +96,7 @@ dict_training_words2 = {
         'Куда вы ходили на прошлых выходных? (last weekend)',
     'is she smart?': 'Она умная? (smart)',
     'does she work?':
-        "Она работает? (в смысле 'работает вообще или безработная?')",
+        'Она работает? (в смысле «работает вообще или безработная?»)',
     'are you tired?': 'Ты утомленный? [tired]',
     'do you drive to work?': 'Ты ездишь на работу? [drive to work]',
     'do you help your parents?': 'Ты помогаешь своим родителям? [your parents]',
@@ -136,7 +136,7 @@ dict_training_words2 = {
     'did you get my email?': 'Ты получил мой емейл? (get)',
     'what did she say?': 'Что она сказала? (say)',
     'it is hot outside': 'На улице жарко [hot]',
-    'you got me wrong': 'Ты получил меня неправильно [wrong]',
+    'you got me wrong': 'Ты получил меня неправильно [wrong] (в смысле "ты меня неверно понял")',
     'we did not like his house': 'Нам не понравился его дом',
     'mike did not come to that party':
         'Mike не пришел на ту вечеринку (come to that party)',
@@ -280,7 +280,7 @@ dict_training_words3 = {
         'Я не хочу попасть в неприятности (get into trouble)',
     'it is hot outside': 'На улице жарко [hot]',
     'you got me wrong':
-        "Ты получил меня неправильно [wrong] (в смысле 'ты меня неверно понял')",
+        'Ты получил меня неправильно [wrong] (в смысле "ты меня неверно понял")',
     'she is interested in politics':
         "Она есть заинтересованная в политике [be interested in politics] (в смысле 'она интересуется политикой')",
     'he should find a job': 'Он должен [should] найти работу [a job]',
