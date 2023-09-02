@@ -6,12 +6,13 @@ from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
-from keyboards.keyboards import (kb_training_or_new_words, kb_training_go, kb_training_in_game, kb_rules)
+from keyboards.keyboards import (kb_training_or_new_words, kb_training_go, kb_training_in_game, kb_rules,
+                                 kb_training_rules_inline)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
 from sqlite_db import (create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress,
                        update_last_sentence, get_last_sentence)
-from handlers.admin_handlers import send_message_to_admin, bot
+from handlers.admin_handlers import send_message_to_admin, bot, create_inline_kb
 
 user_router: Router = Router()
 main_dict = {}
@@ -66,7 +67,7 @@ async def process_start_command(message: Message, state: FSMContext):
 @user_router.message(F.text == 'Выход', ~StateFilter(default_state))
 @user_router.message(F.text == 'Ок, понятно', ~StateFilter(default_state))
 async def process_start_command_patron(message: Message, state: FSMContext):
-    await message.answer(f"""⬇️ Чем займёмся сегодня? ⬇️""",
+    await message.answer(f"""🔻 Чем займёмся сегодня? 🔻""",
                          reply_markup=kb_training_or_new_words)
     await create_profile(message.from_user.id, message.from_user.username,
                          message.from_user.full_name)
@@ -91,6 +92,8 @@ async def training_old(message: Message, state: FSMContext):
     done_lst = await get_progress(message.from_user.id)  # подгружаем данные по прогрессу из БД
     level = await check_hw(message.from_user.id)  # проверяем уровень из БД
     main_dict = dict_dicts[level]  # ставим нужный словарь
+    await  message.answer(f'Отличный выбор!\nЕсли нужно - жми кнопку ниже и посмотри правила',
+                          reply_markup=kb_training_rules_inline)
     await message.answer(f"""Ты находишься на уровне {level}\nПереведено {len(done_lst)}\nВсего {len(main_dict)}""",
                          reply_markup=ReplyKeyboardRemove())
     sentence = random.choice(
@@ -98,6 +101,12 @@ async def training_old(message: Message, state: FSMContext):
     await message.answer(f'Переводи следующее:\n{sentence}')
     await update_last_sentence(message.from_user.id, sentence)
     await state.set_state(FSMtraining.in_process)
+
+
+@user_router.callback_query(F.data == 'Посмотреть правила тренажера')
+async def see_rules_training(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text(
+        text='Правила простые:\nЯ пишу на русском, ты переводишь на английский.\n\nЕсли ответы не совпадут:\n⚪ Можешь попробовать написать предложение ещё раз\n⚪ Можешь поcмотреть ответ, нажав на кнопку «Покажи ответ»')
 
 
 @user_router.message(F.text == 'Покажи ответ',
