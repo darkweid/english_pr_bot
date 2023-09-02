@@ -15,6 +15,8 @@ async def sql_start():
         "CREATE TABLE IF NOT EXISTS users(user_id TEXT PRIMARY KEY,username TEXT, name TEXT, progress TEXT, hw1 BOOLEAN, hw2 BOOLEAN, hw3 BOOLEAN, hw4 BOOLEAN, hw5 BOOLEAN, hw6 BOOLEAN, hw7 BOOLEAN,"
         " hw8 BOOLEAN, hw9 BOOLEAN, hw10 BOOLEAN, hw11 BOOLEAN, hw12 BOOLEAN, hw13 BOOLEAN, hw14 BOOLEAN, hw15 BOOLEAN, hw16 BOOLEAN, hw17 BOOLEAN, hw18 BOOLEAN,"
         " hw19 BOOLEAN, hw20 BOOLEAN, hw21 BOOLEAN, hw22 BOOLEAN, hw23 BOOLEAN, hw24 BOOLEAN, hw25 BOOLEAN, hw26 BOOLEAN, hw27 BOOLEAN, hw28 BOOLEAN, hw29 BOOLEAN, hw30 BOOLEAN, hw31 BOOLEAN, hw32 BOOLEAN, last_sentence TEXT)")
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS new_words(user_id TEXT PRIMARY KEY,username TEXT)")
     db.commit()
 
 
