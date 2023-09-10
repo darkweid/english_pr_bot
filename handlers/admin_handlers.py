@@ -88,12 +88,23 @@ keyboard_exit: InlineKeyboardMarkup = InlineKeyboardMarkup(
 @admin_router.message(Command(commands=["admin"]))
 async def process_admin_command(message: Message, state: FSMContext):
     if str(message.from_user.id) in ADMINS:
-        await message.answer('Что будем делать, хозяин?', reply_markup=keyboard_adm)
+        await message.answer('🟢      Что будем делать?      🟢', reply_markup=keyboard_adm)
         await state.set_state(FSMadmin.admin)
     else:
-        await message.answer('Вам сюда нельзя')
+        await message.answer('🚫 Вам сюда нельзя 🚫')
 
 
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.see_progress_hw))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.progress_words))
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
+# @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id))
+async def exit(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text('🟢 Что будем делать? 🟢', reply_markup=keyboard_adm)
+    await state.set_state(FSMadmin.admin)
+
+
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.seeing_progress_hw))
 @admin_router.callback_query(F.data == 'see_progress', StateFilter(FSMadmin.admin))
 async def see_progress(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FSMadmin.see_progress_hw)
@@ -102,6 +113,14 @@ async def see_progress(callback: CallbackQuery, state: FSMContext):
                                      reply_markup=create_inline_kb(1, last_btn='Выход', **DICT))
 
 
+@admin_router.callback_query(StateFilter(FSMadmin.see_progress_hw))
+async def edit_hw_process1(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(FSMadmin.seeing_progress_hw)
+    await callback.message.edit_text(text=await see_user_hw_progress(callback.data.split(':')[0]),
+                                     reply_markup=keyboard_exit)
+
+
+@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id))
 @admin_router.callback_query(F.data == 'edit_hw', StateFilter(FSMadmin.admin))
 async def edit_hw(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FSMadmin.edit_hw)
@@ -118,23 +137,7 @@ async def see_done_words(callback: CallbackQuery, state: FSMContext):
                                      reply_markup=create_inline_kb(1, last_btn='Выход', **DICT))
 
 
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.see_progress_hw))
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.progress_words))
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
-@admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id))
 @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id_and_hw_number))
-async def exit(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text('Что будем делать, хозяин?', reply_markup=keyboard_adm)
-    await state.set_state(FSMadmin.admin)
-
-
-@admin_router.callback_query(StateFilter(FSMadmin.see_progress_hw))
-async def edit_hw_process1(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(text=await see_user_hw_progress(callback.data.split(':')[0]),
-                                     reply_markup=keyboard_exit)
-
-
 @admin_router.callback_query(StateFilter(FSMadmin.edit_hw))
 async def edit_hw_process2(callback: CallbackQuery, state: FSMContext):
     global user_id
@@ -153,7 +156,6 @@ async def edit_hw_process3(callback: CallbackQuery, state: FSMContext):
                                      reply_markup=create_inline_kb(2, btn_done='✅ Выполнено ✅',
                                                                    btn_undone='❌ Не выполнено ❌', last_btn='Выход'))
     await state.set_state(FSMadmin.edit_hw_got_user_id_and_hw_number)
-    print(type(callback.from_user.id))
 
 
 @admin_router.callback_query(StateFilter(FSMadmin.edit_hw_got_user_id_and_hw_number))
