@@ -14,6 +14,8 @@ class FSMtraining(StatesGroup):
 class FSMadmin(StatesGroup):
     admin = State()  # в админке
     see_progress_hw = State()
+    seeing_progress_hw = State()
+
     edit_hw = State()
     edit_hw_got_user_id = State()
     edit_hw_got_user_id_and_hw_number = State()
