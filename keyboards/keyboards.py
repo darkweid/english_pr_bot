@@ -1,5 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery, BotCommand, URLInputFile
 from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove, ContentType
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # Создаем кнопки Reply
 
@@ -29,3 +30,62 @@ kb_training_in_game_inline: InlineKeyboardMarkup = InlineKeyboardMarkup(
     inline_keyboard=[[btn_show_answer_inl]])
 kb_main_menu: InlineKeyboardMarkup = InlineKeyboardMarkup(
     inline_keyboard=[[btn_main_menu]])
+
+
+######              Генератор клавиатур для тренажера по изучению слов                  ######
+def create_inline_kb_words(width: int, rules: bool | bool = False, contin: bool | bool = False, last_btn: str | None = None,
+                           **kwargs: dict) -> InlineKeyboardMarkup:
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()  # Инициализируем билдер
+    buttons: list[InlineKeyboardButton] = []  # Инициализируем список для кнопок
+
+    if rules:
+        kb_builder.row(InlineKeyboardButton(  # Добавляем в билдер первую кнопку
+            text='🙋‍♀️ Посмотреть правила 🙋',
+            callback_data='Посмотреть правила слова'))
+
+    if contin:
+        kb_builder.row(InlineKeyboardButton(  # Добавляем в билдер первую кнопку
+            text='Продолжить последний раздел',
+            callback_data='Продолжить'))
+
+    if kwargs:  # Заполняем список кнопками из аргументов args и kwargs
+        for button, text in kwargs.items():
+            buttons.append(InlineKeyboardButton(
+                text=button,
+                callback_data=text))
+
+    kb_builder.row(*buttons, width=width)  # Распаковываем список с кнопками в билдер методом row c параметром width
+
+    if last_btn:  # Добавляем в билдер последнюю кнопку, если она передана в функцию
+        kb_builder.row(InlineKeyboardButton(
+            text=last_btn,
+            callback_data=last_btn))
+
+    return kb_builder.as_markup()  # Возвращаем объект инлайн-клавиатуры
+    kb_builder.row(*buttons, width=width)  # Распаковываем список с кнопками в билдер методом row c параметром width
+    return kb_builder.as_markup()  # Возвращаем объект инлайн-клавиатуры
+
+
+######              Генератор клавиатур для админки                  ######
+def create_inline_kb_admin(width: int,
+                           last_btn: str | None = None,
+                           **kwargs: dict) -> InlineKeyboardMarkup:
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()  # Инициализируем билдер
+    buttons: list[InlineKeyboardButton] = []  # Инициализируем список для кнопок
+
+    if kwargs:  # Заполняем список кнопками из аргументов args и kwargs
+        for button, text in kwargs.items():
+            buttons.append(InlineKeyboardButton(
+                text=text,
+                callback_data=text))
+
+    kb_builder.row(*buttons, width=width)  # Распаковываем список с кнопками в билдер методом row c параметром width
+
+    if last_btn:  # Добавляем в билдер последнюю кнопку, если она передана в функцию
+        kb_builder.row(InlineKeyboardButton(
+            text=last_btn,
+            callback_data=last_btn))
+
+    return kb_builder.as_markup()  # Возвращаем объект инлайн-клавиатуры
+    kb_builder.row(*buttons, width=width)  # Распаковываем список с кнопками в билдер методом row c параметром width
+    return kb_builder.as_markup()  # Возвращаем объект инлайн-клавиатуры
