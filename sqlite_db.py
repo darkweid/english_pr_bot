@@ -16,7 +16,7 @@ async def sql_start():
         " hw8 BOOLEAN, hw9 BOOLEAN, hw10 BOOLEAN, hw11 BOOLEAN, hw12 BOOLEAN, hw13 BOOLEAN, hw14 BOOLEAN, hw15 BOOLEAN, hw16 BOOLEAN, hw17 BOOLEAN, hw18 BOOLEAN,"
         " hw19 BOOLEAN, hw20 BOOLEAN, hw21 BOOLEAN, hw22 BOOLEAN, hw23 BOOLEAN, hw24 BOOLEAN, hw25 BOOLEAN, hw26 BOOLEAN, hw27 BOOLEAN, hw28 BOOLEAN, hw29 BOOLEAN, hw30 BOOLEAN, hw31 BOOLEAN, hw32 BOOLEAN, last_sentence TEXT)")
 #    db.execute(
-#        "CREATE TABLE IF NOT EXISTS new_words(user_id TEXT PRIMARY KEY,username TEXT)")
+#        "CREATE TABLE IF NOT EXISTS new_words_users(user_id TEXT PRIMARY KEY,username TEXT, name TEXT, progress TEXT,)")
     db.commit()
 
 
@@ -95,7 +95,7 @@ async def get_users_dict():
     cursor.execute("SELECT user_id, username, name FROM users")
     row = cursor.fetchall()
     for elem in row:
-        dict[elem[0]] = f'{elem[0]}: {elem[1]} {elem[2]}'
+        dict[elem[0]] = f'{elem[0]}: {elem[2]}'
     return dict
 
 
