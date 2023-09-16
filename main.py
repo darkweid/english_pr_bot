@@ -25,7 +25,7 @@ async def main():
 
         # Запускаем бота и пропускаем все накопленные входящие
         # Конфигурируем логирование
-        logging.basicConfig(filename='bot.log',
+        logging.basicConfig(#filename='bot.log',
                             level=logging.INFO,
                             format='#%(levelname)-8s '
                                    '[%(asctime)s] - %(name)s - %(message)s')
