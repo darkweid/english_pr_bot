@@ -127,3 +127,8 @@ school_subjects = {
     "chemistry": "химия",
     "computer science": "информатика"
 }
+
+words_dict = {'Семья': family_vocabulary, 'Еда': food_vocabulary, 'Числа': numbers_vocabulary,
+              'Животные': animals_vocabulary, 'Цвета': colors_vocabulary, 'Одежда': clothing_vocabulary,
+              'Погода': weather_vocabulary, 'Транспорт': transport_vocabulary, 'Школа': school_vocabulary,
+              'Школьные предметы': school_subjects}
