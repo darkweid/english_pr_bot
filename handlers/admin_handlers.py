@@ -10,7 +10,7 @@ from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
-# from keyboards.kb_utils import create_inline_kb, create_reply_kb
+from keyboards.keyboards import create_inline_kb_admin
 
 from states.states import FSMadmin
 from files.dicts import (dict_dicts, list_right_answers)
@@ -18,41 +18,8 @@ from sqlite_db import (create_profile, edit_hw_done, edit_hw_undone, check_hw, d
                        get_progress,
                        get_users_dict, see_user_hw_progress)
 
-
 # Функция для формирования инлайн-клавиатуры на лету
 # Функция для генерации инлайн-клавиатур "на лету"
-def create_inline_kb(width: int,
-                     last_btn: str | None = None,
-                     **kwargs: dict) -> InlineKeyboardMarkup:
-    # Инициализируем билдер
-    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
-    # Инициализируем список для кнопок
-    buttons: list[InlineKeyboardButton] = []
-
-    # Заполняем список кнопками из аргументов args и kwargs
-    if kwargs:
-        for button, text in kwargs.items():
-            buttons.append(InlineKeyboardButton(
-                text=text,
-                callback_data=text))
-
-    # Распаковываем список с кнопками в билдер методом row c параметром width
-    kb_builder.row(*buttons, width=width)
-    # Добавляем в билдер последнюю кнопку, если она передана в функцию
-    if last_btn:
-        kb_builder.row(InlineKeyboardButton(
-            text=last_btn,
-            callback_data=last_btn))
-
-    # Возвращаем объект инлайн-клавиатуры
-    return kb_builder.as_markup()
-
-    # Распаковываем список с кнопками в билдер методом row c параметром width
-    kb_builder.row(*buttons, width=width)
-
-    # Возвращаем объект инлайн-клавиатуры
-    return kb_builder.as_markup()
-
 
 admin_router: Router = Router()
 config: Config = load_config()
@@ -100,7 +67,7 @@ async def process_admin_command(message: Message, state: FSMContext):
 @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw))
 # @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id))
 async def exit(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text('🟢 Что будем делать? 🟢', reply_markup=keyboard_adm)
+    await callback.message.edit_text('🟢      Что будем делать?      🟢', reply_markup=keyboard_adm)
     await state.set_state(FSMadmin.admin)
 
 
@@ -110,7 +77,7 @@ async def see_progress(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FSMadmin.see_progress_hw)
     DICT = await get_users_dict()
     await callback.message.edit_text(text='Чей прогресс будем смотреть?',
-                                     reply_markup=create_inline_kb(1, last_btn='Выход', **DICT))
+                                     reply_markup=create_inline_kb_admin(1, last_btn='Выход', **DICT))
 
 
 @admin_router.callback_query(StateFilter(FSMadmin.see_progress_hw))
@@ -126,7 +93,7 @@ async def edit_hw(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FSMadmin.edit_hw)
     DICT = await get_users_dict()
     await callback.message.edit_text(text='Чей прогресс по ДЗ изменить?',
-                                     reply_markup=create_inline_kb(1, last_btn='Выход', **DICT))
+                                     reply_markup=create_inline_kb_admin(1, last_btn='Выход', **DICT))
 
 
 @admin_router.callback_query(F.data == 'Посмотреть выученные слова', StateFilter(FSMadmin.admin))
@@ -134,7 +101,7 @@ async def see_done_words(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FSMadmin.progress_words)
     DICT = await get_users_dict()
     await callback.message.edit_text(text='Чей прогресс по выученным словам будем смотреть?',
-                                     reply_markup=create_inline_kb(1, last_btn='Выход', **DICT))
+                                     reply_markup=create_inline_kb_admin(1, last_btn='Выход', **DICT))
 
 
 @admin_router.callback_query(F.data == 'Выход', StateFilter(FSMadmin.edit_hw_got_user_id_and_hw_number))
@@ -145,7 +112,7 @@ async def edit_hw_process2(callback: CallbackQuery, state: FSMContext):
     user_id = (callback.data.split(':')[0])
     await state.set_state(FSMadmin.edit_hw_got_user_id)
     await callback.message.edit_text(text='Какое ДЗ изменить?',
-                                     reply_markup=create_inline_kb(4, last_btn='Выход', **DICT))
+                                     reply_markup=create_inline_kb_admin(4, last_btn='Выход', **DICT))
 
 
 @admin_router.callback_query(StateFilter(FSMadmin.edit_hw_got_user_id))
@@ -153,8 +120,9 @@ async def edit_hw_process3(callback: CallbackQuery, state: FSMContext):
     global hw_number
     hw_number = int(callback.data)
     await callback.message.edit_text(text='Какое состояние установить?',
-                                     reply_markup=create_inline_kb(2, btn_done='✅ Выполнено ✅',
-                                                                   btn_undone='❌ Не выполнено ❌', last_btn='Выход'))
+                                     reply_markup=create_inline_kb_admin(2, btn_done='✅ Выполнено ✅',
+                                                                         btn_undone='❌ Не выполнено ❌',
+                                                                         last_btn='Выход'))
     await state.set_state(FSMadmin.edit_hw_got_user_id_and_hw_number)
 
 
