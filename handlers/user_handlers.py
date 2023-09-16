@@ -6,12 +6,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from keyboards.keyboards import (kb_main_menu, kb_training_rules_inline, kb_training_or_new_words_inline,
-                                 kb_training_in_game_inline)
+                                 kb_training_in_game_inline, create_inline_kb_words)
 from states.states import FSMtraining
 from files.dicts import (dict_dicts, list_right_answers)
+from files.words import words_dict
 from sqlite_db import (create_profile, edit_hw_done, check_hw, dict_hw, update_progress, get_progress,
                        update_last_sentence, get_last_sentence)
-from handlers.admin_handlers import send_message_to_admin, bot, create_inline_kb
+from handlers.admin_handlers import send_message_to_admin, bot
 
 user_router: Router = Router()
 main_dict = {}
@@ -170,6 +171,29 @@ async def check_translation(message: Message, state: FSMContext):
 
 
 ######################## ИЗУЧЕНИЕ НОВЫХ СЛОВ ##########################Новые слова
+@user_router.callback_query(F.data == 'Новые слова')
+@user_router.callback_query(F.data == 'Понятно')
+async def new_words_main_menu(callback: CallbackQuery, state: FSMContext):
+    DICT = {str(key): str(key) for key, value in words_dict.items()}
+    await state.set_state(FSMtraining.in_process_new_words)
+    await callback.message.edit_text('Выбери группу слов, которую хочешь изучать',
+                                     reply_markup=create_inline_kb_words(2, True, True, last_btn='Главное меню',
+                                                                         **DICT))
+
+
+@user_router.message(StateFilter(FSMtraining.in_process_new_words))
+async def new_words_main_menu_in_process(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text()
+
+
+@user_router.callback_query(F.data == 'Посмотреть правила слова')
+async def see_rules_training(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await callback.message.edit_text(
+        text=f"""Я использую систему интервальных повторений
+\n⚪ Слова, которые ты часто переводишь правильно, я буду показывать с каждым днём всё реже и реже
+\n⚪ Слова, которые будут запоминаться тяжело, я буду показывать до тех пор, пока ты их не запомнишь""",
+        reply_markup=create_inline_kb_words(1, Понятно='Понятно'))
 
 
 @user_router.message()
