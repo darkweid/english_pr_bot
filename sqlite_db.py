@@ -10,13 +10,12 @@ async def sql_start():
     db = sq.connect('users.db')
     cursor = db.cursor()
     if db:
-        print('Database succesfully started!;)')
+        print('Database USERS succesfully started!;)')
     db.execute(
         "CREATE TABLE IF NOT EXISTS users(user_id TEXT PRIMARY KEY,username TEXT, name TEXT, progress TEXT, hw1 BOOLEAN, hw2 BOOLEAN, hw3 BOOLEAN, hw4 BOOLEAN, hw5 BOOLEAN, hw6 BOOLEAN, hw7 BOOLEAN,"
         " hw8 BOOLEAN, hw9 BOOLEAN, hw10 BOOLEAN, hw11 BOOLEAN, hw12 BOOLEAN, hw13 BOOLEAN, hw14 BOOLEAN, hw15 BOOLEAN, hw16 BOOLEAN, hw17 BOOLEAN, hw18 BOOLEAN,"
-        " hw19 BOOLEAN, hw20 BOOLEAN, hw21 BOOLEAN, hw22 BOOLEAN, hw23 BOOLEAN, hw24 BOOLEAN, hw25 BOOLEAN, hw26 BOOLEAN, hw27 BOOLEAN, hw28 BOOLEAN, hw29 BOOLEAN, hw30 BOOLEAN, hw31 BOOLEAN, hw32 BOOLEAN, last_sentence TEXT)")
-#    db.execute(
-#        "CREATE TABLE IF NOT EXISTS new_words_users(user_id TEXT PRIMARY KEY,username TEXT, name TEXT, progress TEXT,)")
+        " hw19 BOOLEAN, hw20 BOOLEAN, hw21 BOOLEAN, hw22 BOOLEAN, hw23 BOOLEAN, hw24 BOOLEAN, hw25 BOOLEAN, hw26 BOOLEAN, hw27 BOOLEAN, hw28 BOOLEAN, hw29 BOOLEAN, last_verb TEXT, level_verbs INTEGER, progress_verbs TEXT, last_sentence TEXT)")
+    # db.execute("CREATE TABLE IF NOT EXISTS words(user_id TEXT PRIMARY KEY,username TEXT, name TEXT, progress TEXT,)")
     db.commit()
 
 
@@ -27,9 +26,17 @@ async def create_profile(user_id, username, name):
             "INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (user_id, username, name, '[]', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
              'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
-             'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
-             'False', '[]'))
+             'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', '[]', 1,
+             '[]', '[]'))
         db.commit()
+
+
+# async def create_profile_words(user_id, username, name):
+#     user = cursor.execute("SELECT 1 FROM words WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+#     if not user:
+#         cursor.execute(
+#             "INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+#             (user_id, username, name, '[]', 'False', 'False',))
 
 
 async def edit_hw_done(user_id, hw_name):
@@ -117,10 +124,63 @@ async def see_user_hw_progress(user_id):
     return final_result
 
 
+########################### VERBS ###########################
+async def get_progress_verbs(user_id):
+    cursor.execute("SELECT progress_verbs FROM users WHERE user_id== ?", (user_id,))
+    row = cursor.fetchone()
+    if row is not None:
+        list_as_text = row[0]
+        my_list = json.loads(list_as_text)
+        return my_list
+    db.commit()
+
+
+async def update_progress_verbs(user_id, data=[]):
+    list_as_text = json.dumps(data)
+    cursor.execute(
+        "UPDATE users SET progress_verbs = ? WHERE user_id == ?", (list_as_text, user_id))
+    db.commit()
+
+
+async def get_or_edit_verbs_level(user_id, edited=False):
+    if edited == False:
+        cursor.execute("SELECT level_verbs FROM users WHERE user_id== ?", (user_id,))
+        value = cursor.fetchone()[0]
+        return value
+        db.commit()
+    elif edited == True:
+        cursor.execute("SELECT level_verbs FROM users WHERE user_id== ?", (user_id,))
+        value = cursor.fetchone()[0]
+        value += 1
+        cursor.execute(
+            "UPDATE users SET level_verbs = ? WHERE user_id == ?", (value, user_id))
+        return value
+        db.commit()
+
+
+async def get_last_verb(user_id):
+    cursor.execute("SELECT last_verb FROM users WHERE user_id== ?", (user_id,))
+    row = cursor.fetchone()
+    if row is not None:
+        list_as_text = row[0]
+        my_list = json.loads(list_as_text)
+        return my_list
+    db.commit()
+
+
+async def update_last_verb(user_id, data=[]):
+    try:
+        str_as_text = json.dumps(data)
+        cursor.execute(
+            "UPDATE users SET last_verb = ? WHERE user_id == ?", (str_as_text, user_id))
+        db.commit()
+    except:
+        print(f'Ошибка в функции update_last_sentence\n{user_id}\n{data}')
+
+
 dict_hw = {
     1: 'hw1', 2: 'hw2', 3: 'hw3', 4: 'hw4', 5: 'hw5', 6: 'hw6', 7: 'hw7', 8: 'hw8', 9: 'hw9',
     10: 'hw10', 11: 'hw11', 12: 'hw12', 13: 'hw13', 14: 'hw14', 15: 'hw15', 16: 'hw16',
     17: 'hw17', 18: 'hw18', 19: 'hw19', 20: 'hw20', 21: 'hw21', 22: 'hw22', 23: 'hw23',
-    24: 'hw24', 25: 'hw25', 26: 'hw26', 27: 'hw27', 28: 'hw28', 29: 'hw29', 30: 'hw30',
-    31: 'hw31', 32: 'hw32'
+    24: 'hw24', 25: 'hw25', 26: 'hw26', 27: 'hw27', 28: 'hw28', 29: 'hw29', 30: 'hw30'
 }

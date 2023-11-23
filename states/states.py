@@ -8,6 +8,7 @@ class FSMtraining(StatesGroup):
     ####### Создаем экземпляры класса State, перечисляя возможные состояния, в которых будет находиться бот #######
     patron_user = State()  # Старый пользователь
     in_process = State()  # проходит тренажер ДЗ
+    in_process_verbs = State() # проходит изучение третьей формы глаголов
     in_process_new_words = State()  # проходит изучение слов
 
 

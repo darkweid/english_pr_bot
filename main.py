@@ -25,19 +25,19 @@ async def main():
 
         # Запускаем бота и пропускаем все накопленные входящие
         # Конфигурируем логирование
-        logging.basicConfig(#filename='bot.log',
-                            level=logging.INFO,
-                            format='#%(levelname)-8s '
-                                   '[%(asctime)s] - %(name)s - %(message)s')
+        logging.basicConfig(  # filename='bot.log',
+            level=logging.INFO,
+            format='#%(levelname)-8s '
+                   '[%(asctime)s] - %(name)s - %(message)s')
 
         # Выводим в консоль информацию о начале запуска бота
         logger.info('Starting bot')
         # Инициализируем Redis
         redis: Redis = Redis(host='localhost')
         storage: RedisStorage = RedisStorage(redis=redis)
-        superadmin = config.tg_bot.admin_ids[0]
         # запускаем БД sqlite3
         await sqlite_db.sql_start()
+        # await sqlite_db.sql_start_words()
         bot: Bot = Bot(token=BOT_TOKEN, parse_mode='HTML')
         dp: Dispatcher = Dispatcher(storage=storage)
         # Регистрируем роутеры в диспетчере
