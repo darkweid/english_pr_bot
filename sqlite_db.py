@@ -119,7 +119,13 @@ async def see_user_hw_progress(user_id):
         progress = f'Сейчас выполнено {len(my_list)} предложений из {len(dct)}\nв Д/З №{hw_number}\n\n'
     final_result = ''
     final_result = progress
-    for i in range(1, 33):
+    if len(result[-2]) > 2:
+        verbs = json.loads(result[-2])
+        final_result += f'Сейчас переведено {len(verbs)} слов из 120\nна уровне {result[-3]} \n\n'
+
+    else:
+        final_result += f'Сейчас переведено 0 слов из 120\nна уровне {result[-3]} \n\n'
+    for i in range(1, 16):  ############## Здесь количество отображаемых ДЗ ################
         final_result += f"""ДЗ №{i}: {'✅Выполнено' if result[i + 3] == 'True' else '❌Не выполнено'}\n"""
     return final_result
 
@@ -175,12 +181,12 @@ async def update_last_verb(user_id, data=[]):
             "UPDATE users SET last_verb = ? WHERE user_id == ?", (str_as_text, user_id))
         db.commit()
     except:
-        print(f'Ошибка в функции update_last_sentence\n{user_id}\n{data}')
+        print(f'Ошибка в функции update_last_verb\n{user_id}\n{data}')
 
 
 dict_hw = {
     1: 'hw1', 2: 'hw2', 3: 'hw3', 4: 'hw4', 5: 'hw5', 6: 'hw6', 7: 'hw7', 8: 'hw8', 9: 'hw9',
     10: 'hw10', 11: 'hw11', 12: 'hw12', 13: 'hw13', 14: 'hw14', 15: 'hw15', 16: 'hw16',
     17: 'hw17', 18: 'hw18', 19: 'hw19', 20: 'hw20', 21: 'hw21', 22: 'hw22', 23: 'hw23',
-    24: 'hw24', 25: 'hw25', 26: 'hw26', 27: 'hw27', 28: 'hw28', 29: 'hw29', 30: 'hw30'
+    24: 'hw24', 25: 'hw25', 26: 'hw26', 27: 'hw27', 28: 'hw28', 29: 'hw29'
 }
